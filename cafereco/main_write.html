@@ -1,0 +1,172 @@
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>리뷰 게시판</title>
+    <!-- css 가져오기 -->
+    <link rel="stylesheet" type="text/css" href="semantic.min.css">
+
+
+    <style type="text/css">
+        body {
+            background-color: #DADADA;
+            background-image: linear-gradient(75deg, #00B5AD 15%,  #9EDBE5 55%)
+        }
+
+        body>.grid {
+            height: 100%;
+        }
+
+        .image {
+            margin-top: -100px;
+        }
+
+        .column {
+            max-width: 1000px;
+        }
+
+        .view_btn {
+            cursor: pointer;
+        }
+
+    </style>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@200&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!--
+
+    <h1 style="display: block;
+    width: 100%;
+    height: 3em;
+    line-height: 3em;
+    background: rgba(255, 255, 255, 0.15);
+    border: solid 1px rgba(255, 255, 255, 0.75);
+    color: #fff;
+    display: inline-block;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-align: center;
+    text-transform: uppercase;
+    border-radius: 0.35em;
+    margin: 0; padding:0; font:inherit; vertical-align:baseline;
+    box-sizing: inherit; cursor: pointer; text-decoration:none;
+    -webkit-text-size-adjust: none; animation: none; transition: none;"
+   id="logo"><a href="main.html">Cafereco</a></h1> -->
+
+
+    </style>
+
+    <div class="ui middle aligned center aligned grid">
+        <div class="column">
+            <h2 style = "font-family: 'Hahmlet', serif;" class="ui teal image header" >
+                리뷰 게시판
+            </h2>
+            <div class="ui large form">
+                <div class="ui stacked segment">
+                    <a href="write_bbs.html"><button class="ui fluid large teal submit button">카페 리뷰 작성하기</button></a>
+                    <table class="ui celled table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>제목</th>
+                                <th>아이디</th>
+                                <th>등록일</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="ui error message"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="ui modal" id='view_modal'>
+        <i class="close">x</i>
+        <div class="header" id="b_title">
+            
+        </div>
+        <div class="content">
+            <div class="description">
+            	<p style = "text-align: right" id = "b_review"></p>
+            	<div id = 'b_content'></div>
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui black deny button">
+                닫기
+            </div>
+        </div>
+    </div>
+
+    <!-- js 가져오기 -->
+    <script src="jquery3.3.1.min.js"></script>
+    <script src="semantic.min.css"></script>
+
+    <script>
+        $(document).ready(function() {
+            $.ajax({
+                type: "get",
+                url: "bbs_all",
+                success: function(data) {
+                    console.log(data);
+                    for (var str in data) {
+                        var tr = $("<tr></tr>").attr("data-id", data[str]['b_no']).appendTo("#list");
+                        $("<td></td>").text(data[str]['b_no']).addClass("view_btn").appendTo(tr);
+                        $("<td></td>").text(data[str]['b_title']).addClass("view_btn").appendTo(tr);
+                        $("<td></td>").text(data[str]['b_ownernick']).addClass("view_btn").appendTo(tr);
+                        $("<td></td>").text(FormatToUnixtime(data[str]['b_regdate'])).addClass("view_btn").appendTo(tr);
+                    }
+                },
+                error: function(error) {
+                    alert("오류 발생" + error);
+                }
+            });
+
+            $(document).on("click", ".view_btn", function() {
+                var b_no = $(this).parent().attr("data-id");
+
+                $.ajax({
+                    type: "get",
+                    url: "get_bbs",
+                    data: {
+                        b_no: b_no
+                    },
+                    success: function(data) {
+                    	console.log(data);
+                    	$("#b_title").text(data['b_title']);
+                    	$("#b_review").text(data['b_ownernick'] + " - " +  FormatToUnixtime(data['b_regdate']));
+                    	$("#b_content").text(data['b_content']);
+                    	$('#view_modal').modal('show');
+                    },
+                    error: function(error) {
+                        alert("오류 발생" + error);
+                    }
+                });
+            });
+
+            function FormatToUnixtime(unixtime) {
+                var u = new Date(unixtime);
+                return u.getUTCFullYear() +
+                    '-' + ('0' + u.getUTCMonth()).slice(-2) +
+                    '-' + ('0' + u.getUTCDate()).slice(-2) +
+                    ' ' + ('0' + u.getUTCHours()).slice(-2) +
+                    ':' + ('0' + u.getUTCMinutes()).slice(-2) +
+                    ':' + ('0' + u.getUTCSeconds()).slice(-2)
+            };
+        });
+
+    </script>
+</body>
+
+</html>
